@@ -7,7 +7,7 @@ public class MarketData {
     private float price;
     private float volume;
     private int level;
-    private byte type;//0-bid,1-ask
+    private OrderType type;//0-bid,1-ask
 
     public float getPrice() {
         return price;
@@ -33,11 +33,11 @@ public class MarketData {
         this.level = level;
     }
 
-    public byte getType() {
+    public OrderType getType() {
         return type;
     }
 
-    public void setType(byte type) {
+    public void setType(OrderType type) {
         this.type = type;
     }
 }
