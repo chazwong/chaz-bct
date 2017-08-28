@@ -1,12 +1,11 @@
 package chaz.trade;
 
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.TreeMap;
 
 /**
  * Created by chengzhang.wang on 2017/8/22.
  */
 public class OrderBook {
-    ConcurrentLinkedQueue<BTCOrder> bidBook;
-    ConcurrentLinkedQueue<BTCOrder> askBook;
+    private final TreeMap<String,MarketData> bidBook = new TreeMap<>();
+    private final TreeMap<String,MarketData> askBook = new TreeMap<>();
 }
