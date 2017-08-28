@@ -1,4 +1,4 @@
-package chaz.trade;
+package chaz.trade.model;
 
 import java.util.TreeMap;
 
