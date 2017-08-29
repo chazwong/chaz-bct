@@ -1,4 +1,4 @@
-package chaz.trade;
+package chaz.trade.core;
 
 import chaz.trade.model.MarketData;
 import chaz.trade.model.Order;
@@ -16,19 +16,19 @@ import java.util.TreeMap;
  * Created by chengzhang.wang on 2017/8/26.
  */
 
-public class TradeHandler implements EventHandler<MarketData> {
+public class TradeHandler implements EventHandler<MarketEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(TradeHandler.class);
     private final TreeMap<Integer, MarketData> bidBook = new TreeMap<>();
     private final TreeMap<Integer, MarketData> askBook = new TreeMap<>();
-    private final Map<Integer,OrderSender> orderSenderMap = new HashMap<>();
+    private final Map<Integer, OrderSender> orderSenderMap = new HashMap<>();
 
     @Override
-    public void onEvent(MarketData event, long sequence, boolean endOfBatch) throws Exception {
-        if (event.getOrderType() == OrderType.ASK) {
-            askBook.put(event.getMarketID(), event);
+    public void onEvent(MarketEvent event, long sequence, boolean endOfBatch) throws Exception {
+        if (event.getMarketData().getOrderType() == OrderType.ASK) {
+            askBook.put(event.getMarketData().getMarketID(), event.getMarketData());
             checkTrade();
-        } else if (event.getOrderType() == OrderType.BID) {
-            bidBook.put(event.getMarketID(), event);
+        } else if (event.getMarketData().getOrderType() == OrderType.BID) {
+            bidBook.put(event.getMarketData().getMarketID(), event.getMarketData());
             checkTrade();
         } else {
             LOGGER.error("event type is neither bid nor ask");
@@ -38,14 +38,14 @@ public class TradeHandler implements EventHandler<MarketData> {
     private final void checkTrade() {
         MarketData firstBid = bidBook.lastEntry().getValue();
         MarketData firstAsk = askBook.firstEntry().getValue();
-        if ((firstBid.getPrice() - firstAsk.getPrice())>100) {
+        if ((firstBid.getPrice() - firstAsk.getPrice()) > 100) {
             Order bidOrder = new Order();
             bidOrder.setPrice(firstAsk.getPrice());
-            bidOrder.setVolume(Math.min(firstBid.getVolume(),firstAsk.getVolume()));
+            bidOrder.setVolume(Math.min(firstBid.getVolume(), firstAsk.getVolume()));
             orderSenderMap.get(firstAsk.getMarketID()).sendBidOrder(bidOrder);
             Order askOrder = new Order();
             askOrder.setPrice(firstBid.getPrice());
-            askOrder.setVolume(Math.min(firstBid.getVolume(),firstAsk.getVolume()));
+            askOrder.setVolume(Math.min(firstBid.getVolume(), firstAsk.getVolume()));
         }
     }
 }

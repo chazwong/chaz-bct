@@ -1,6 +1,7 @@
 package chaz.trade;
 
-import chaz.trade.model.MarketData;
+import chaz.trade.core.MarketEvent;
+import chaz.trade.core.TradeHandler;
 import com.lmax.disruptor.dsl.Disruptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -17,10 +18,13 @@ import javax.annotation.PreDestroy;
 @SpringBootApplication
 public class Application {
     @Autowired
-    private Disruptor<MarketData> disruptor;
+    private Disruptor<MarketEvent> disruptor;
+    @Autowired
+    private TradeHandler tradeHandler;
 
     @PostConstruct
     private void start() {
+        disruptor.handleEventsWith(tradeHandler);
         disruptor.start();
     }
 
