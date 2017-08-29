@@ -14,5 +14,6 @@ dependencies {
     compile group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.1'
     compile group: 'com.lmax', name: 'disruptor', version: '3.3.6'
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter', version: '1.5.6.RELEASE'
     testCompile group: 'junit', name: 'junit', version: '4.11'
 }
