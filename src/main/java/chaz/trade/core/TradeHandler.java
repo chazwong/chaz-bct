@@ -7,6 +7,7 @@ import chaz.trade.output.OrderSender;
 import com.lmax.disruptor.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +16,7 @@ import java.util.TreeMap;
 /**
  * Created by chengzhang.wang on 2017/8/26.
  */
-
+@Component
 public class TradeHandler implements EventHandler<MarketEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(TradeHandler.class);
     private final TreeMap<Integer, MarketData> bidBook = new TreeMap<>();
