@@ -2,7 +2,8 @@ package chaz.trade;
 
 import chaz.trade.core.MarketEvent;
 import chaz.trade.core.TradeHandler;
-import chaz.trade.input.Huobi.HuobiInputer;
+import chaz.trade.input.Huobi.HuobiWSConnector;
+import chaz.trade.input.okcoin.OkcoinWSConnector;
 import com.lmax.disruptor.dsl.Disruptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -23,13 +24,17 @@ public class Application {
     @Autowired
     private TradeHandler tradeHandler;
     @Autowired
-    private HuobiInputer huobiInputer;
+    private HuobiWSConnector huobiWSConnector;
+
+    @Autowired
+    private OkcoinWSConnector okcoinWSConnector;
 
     @PostConstruct
     private void start(){
         disruptor.handleEventsWith(tradeHandler);
         disruptor.start();
-        huobiInputer.start();
+        huobiWSConnector.start();
+        okcoinWSConnector.start();
     }
 
     @PreDestroy

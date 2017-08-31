@@ -1,13 +1,9 @@
-package chaz.trade.input.Huobi;
+package chaz.trade.input.okcoin;
 
-import chaz.trade.core.MarketEvent;
 import com.google.gson.*;
-import com.lmax.disruptor.dsl.Disruptor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
 import java.io.ByteArrayInputStream;
@@ -17,23 +13,19 @@ import java.nio.charset.StandardCharsets;
 import java.util.zip.GZIPInputStream;
 
 /**
- * Created by Administrator on 2017/8/30.
+ * Created by Administrator on 2017/8/31.
  */
-@Component
 @ClientEndpoint
-public class Endpoint {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Endpoint.class);
-
-    @Autowired
-    private Disruptor<MarketEvent> disruptor;
+public class EndPoint {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EndPoint.class);
 
     @OnOpen
     public void onOpen(Session session) {
         LOGGER.info("Connected to server: " + session.getBasicRemote());
         try {
             SubscribeRequestModel model = new SubscribeRequestModel();
-            model.setId(String.valueOf(MarketID.MARKET_SUBSCRIBE.ordinal()));
-            model.setSub("market.btccny.depth.step1");
+            model.setEvent("addChannel");
+            model.setChannel("ok_sub_spotcny_btc_depth_20");
             Gson gson = new GsonBuilder().create();
             session.getBasicRemote().sendText(gson.toJson(model));
         } catch (IOException ex) {
@@ -45,14 +37,9 @@ public class Endpoint {
     public void processMessage(String message) {
         JsonElement jelement = new JsonParser().parse(message);
         JsonObject jobject = jelement.getAsJsonObject();
-        if (jobject.has("id")) {
-            if (StringUtils.equals(jobject.get("id").getAsString(), String.valueOf(MarketID.MARKET_SUBSCRIBE.ordinal())) && StringUtils.equals(jobject.get("status").getAsString(), "ok")) {
+        if (jobject.has("channel")) {
+            if (StringUtils.equals(jobject.get("channel").getAsString(),"ok_sub_spotcny_btc_depth_20")) {
                 LOGGER.info("subscribe huibi market scueess");
-            }
-        } else if (jobject.has("ch")) {
-            if (StringUtils.equals(jobject.get("ch").getAsString(), "market.btccny.depth.step0")) {
-                JsonElement bids = jobject.getAsJsonArray("data").get(0);
-                JsonElement asks = jobject.getAsJsonArray("data").get(1);
             }
         }
     }

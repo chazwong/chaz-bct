@@ -3,7 +3,7 @@ package chaz.trade.input.Huobi;
 /**
  * Created by Administrator on 2017/8/29.
  */
-public class SubRequestModel {
+public class SubscribeRequestModel {
     private String sub;
     private String id;
 

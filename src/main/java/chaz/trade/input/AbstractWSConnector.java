@@ -1,8 +1,7 @@
-package chaz.trade.input.Huobi;
+package chaz.trade.input;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import javax.websocket.ContainerProvider;
 import javax.websocket.Session;
@@ -11,20 +10,17 @@ import java.io.IOException;
 import java.net.URI;
 
 /**
- * Created by Administrator on 2017/8/28.
+ * Created by Administrator on 2017/8/31.
  */
-@Component
-public class HuobiInputer {
-    private static final Logger LOGGER = LoggerFactory.getLogger(HuobiInputer.class);
-    private final String url = "wss://api.huobi.pro/ws";
+public abstract class AbstractWSConnector {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractWSConnector.class);
 
     private Session session;
 
     public void start() {
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-        String uri = "wss://api.huobi.com/ws";
         try {
-            session = container.connectToServer(Endpoint.class, URI.create(uri));
+            session = container.connectToServer(getEndpointClass(), URI.create(getUrl()));
         } catch (Exception e) {
             LOGGER.error("connect server failed", e);
         }
@@ -40,5 +36,8 @@ public class HuobiInputer {
         }
     }
 
+    protected abstract String getUrl();
+
+    protected abstract Class<?> getEndpointClass();
 
 }
