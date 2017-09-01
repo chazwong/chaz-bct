@@ -35,26 +35,14 @@ public class EndPoint {
 
     @OnMessage
     public void processMessage(String message) {
-        JsonElement jelement = new JsonParser().parse(message);
-        JsonObject jobject = jelement.getAsJsonObject();
-        if (jobject.has("channel")) {
-            if (StringUtils.equals(jobject.get("channel").getAsString(),"ok_sub_spotcny_btc_depth_20")) {
-                LOGGER.info("subscribe huibi market scueess");
-            }
-        }
-    }
-
-    @OnMessage
-    public void processBinary(byte[] bytes) throws IOException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        ByteArrayInputStream in = new ByteArrayInputStream(new String(bytes, StandardCharsets.ISO_8859_1).getBytes("ISO-8859-1"));
-        GZIPInputStream gunzip = new GZIPInputStream(in);
-        byte[] buffer = new byte[256];
-        int n;
-        while ((n = gunzip.read(buffer)) >= 0) {
-            out.write(buffer, 0, n);
-        }
-        LOGGER.info("received bytes {}",out.toString());
+        LOGGER.info("received message:"+message);
+//        JsonElement jelement = new JsonParser().parse(message);
+//        JsonObject jobject = jelement.getAsJsonObject();
+//        if (jobject.has("channel")) {
+//            if (StringUtils.equals(jobject.get("channel").getAsString(),"ok_sub_spotcny_btc_depth_20")) {
+//                LOGGER.info("subscribe huibi market scueess");
+//            }
+//        }
     }
 
     @OnError
