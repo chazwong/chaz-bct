@@ -2,7 +2,7 @@ package chaz.trade;
 
 import chaz.trade.core.MarketEvent;
 import chaz.trade.core.TradeHandler;
-import chaz.trade.input.Huobi.HuobiWSConnector;
+import chaz.trade.input.huobi.HuobiWSConnector;
 import chaz.trade.input.okcoin.OkcoinWSConnector;
 import com.lmax.disruptor.dsl.Disruptor;
 import org.springframework.beans.factory.annotation.Autowired;

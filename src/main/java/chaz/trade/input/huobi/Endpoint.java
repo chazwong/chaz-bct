@@ -1,4 +1,4 @@
-package chaz.trade.input.Huobi;
+package chaz.trade.input.huobi;
 
 import chaz.trade.core.MarketEvent;
 import com.google.gson.*;
