@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class HuobiWSConnector extends AbstractWSConnector{
-    private final String url = "wss://api.huobi.pro/ws";
+    private final String url = "wss://api.huobi.com/ws";
 
     @Override
     protected String getUrl() {

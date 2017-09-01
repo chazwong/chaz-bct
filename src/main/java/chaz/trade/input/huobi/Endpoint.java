@@ -13,7 +13,6 @@ import javax.websocket.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -33,7 +32,7 @@ public class Endpoint {
         try {
             SubscribeRequestModel model = new SubscribeRequestModel();
             model.setId(String.valueOf(MarketID.MARKET_SUBSCRIBE.ordinal()));
-            model.setSub("market.btccny.depth.step1");
+            model.setSub("market.btccny.depth.step0");
             Gson gson = new GsonBuilder().create();
             session.getBasicRemote().sendText(gson.toJson(model));
         } catch (IOException ex) {
@@ -60,7 +59,7 @@ public class Endpoint {
     @OnMessage
     public void processBinary(byte[] bytes) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        ByteArrayInputStream in = new ByteArrayInputStream(new String(bytes, StandardCharsets.ISO_8859_1).getBytes("ISO-8859-1"));
+        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
         GZIPInputStream gunzip = new GZIPInputStream(in);
         byte[] buffer = new byte[256];
         int n;
