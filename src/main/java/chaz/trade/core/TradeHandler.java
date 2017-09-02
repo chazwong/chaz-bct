@@ -1,9 +1,9 @@
 package chaz.trade.core;
 
+import chaz.trade.connector.OrderSender;
 import chaz.trade.model.MarketSource;
 import chaz.trade.model.Order;
 import chaz.trade.model.OrderType;
-import chaz.trade.output.OrderSender;
 import com.lmax.disruptor.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,13 +1,16 @@
 package chaz.trade.connector.okcoin;
 
-import chaz.trade.Application;
+import chaz.trade.core.MarketEvent;
 import chaz.trade.model.MarketSource;
 import chaz.trade.model.OrderType;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.lmax.disruptor.dsl.Disruptor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
 import java.io.IOException;
@@ -18,11 +21,19 @@ import java.util.Map;
  * Created by Administrator on 2017/8/31.
  */
 @ClientEndpoint
+@Component
 public class EndPoint {
     private static final Logger LOGGER = LoggerFactory.getLogger(EndPoint.class);
     private final Gson gson = new Gson();
 
     private final String channel = "ok_sub_spot_btc_depth";
+
+    @Autowired
+    private Disruptor<MarketEvent> disruptor;
+
+    public EndPoint(Disruptor<MarketEvent> disruptor) {
+        this.disruptor = disruptor;
+    }
 
     @OnOpen
     public void onOpen(Session session) {
@@ -54,7 +65,7 @@ public class EndPoint {
             List<List<String>> asks = map.get("asks");
             List<List<String>> bids = map.get("bids");
             if (asks.size() > 0) {
-                Application.getDisuptor().publishEvent((event, sequence, arg) -> {
+                disruptor.publishEvent((event, sequence, arg) -> {
                     event.setLevel(0);
                     event.setMarketID(MarketSource.OKCOIN);
                     event.setPrice(Float.valueOf(arg.get(0)));
@@ -63,7 +74,7 @@ public class EndPoint {
                 }, asks.get(0));
             }
             if (bids.size() > 0) {
-                Application.getDisuptor().publishEvent((event, sequence, arg) -> {
+                disruptor.publishEvent((event, sequence, arg) -> {
                     event.setLevel(0);
                     event.setMarketID(MarketSource.OKCOIN);
                     event.setPrice(Float.valueOf(arg.get(0)));

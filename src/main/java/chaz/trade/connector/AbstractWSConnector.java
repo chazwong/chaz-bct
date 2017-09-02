@@ -12,7 +12,7 @@ import java.net.URI;
 /**
  * Created by Administrator on 2017/8/31.
  */
-public abstract class AbstractWSConnector {
+public abstract class AbstractWSConnector implements OrderSender {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractWSConnector.class);
 
     private Session session;
@@ -20,7 +20,7 @@ public abstract class AbstractWSConnector {
     public void start() {
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         try {
-            session = container.connectToServer(getEndpointClass(), URI.create(getUrl()));
+            session = container.connectToServer(getEndpointInstance(), URI.create(getUrl()));
         } catch (Exception e) {
             LOGGER.error("connect server failed", e);
         }
@@ -38,6 +38,6 @@ public abstract class AbstractWSConnector {
 
     protected abstract String getUrl();
 
-    protected abstract Class<?> getEndpointClass();
+    protected abstract Object getEndpointInstance();
 
 }

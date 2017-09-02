@@ -1,6 +1,8 @@
 package chaz.trade.connector.okcoin;
 
 import chaz.trade.connector.AbstractWSConnector;
+import chaz.trade.model.Order;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -10,13 +12,26 @@ import org.springframework.stereotype.Component;
 public class OkcoinWSConnector extends AbstractWSConnector {
     private final String url = "wss://real.okcoin.cn:10440/websocket/okcoinapi";
 
+    @Autowired
+    private EndPoint endpoint;
+
     @Override
     protected String getUrl() {
         return url;
     }
 
     @Override
-    protected Class<?> getEndpointClass() {
-        return EndPoint.class;
+    protected Object getEndpointInstance() {
+        return endpoint;
+    }
+
+    @Override
+    public void sendBidOrder(Order order) {
+
+    }
+
+    @Override
+    public void sendAskOrder(Order order) {
+
     }
 }

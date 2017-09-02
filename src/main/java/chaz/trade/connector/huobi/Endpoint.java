@@ -1,12 +1,16 @@
 package chaz.trade.connector.huobi;
 
 import chaz.trade.Application;
+import chaz.trade.core.MarketEvent;
 import chaz.trade.model.MarketSource;
 import chaz.trade.model.OrderType;
 import com.google.gson.*;
+import com.lmax.disruptor.dsl.Disruptor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
 import java.io.ByteArrayInputStream;
@@ -20,12 +24,16 @@ import java.util.zip.GZIPInputStream;
  * Created by Administrator on 2017/8/30.
  */
 @ClientEndpoint
+@Component
 public class Endpoint {
     private static final Logger LOGGER = LoggerFactory.getLogger(Endpoint.class);
 
     private final String channel = "market.btccny.depth.step0";
 
-    private final Gson gson = new Gson();
+    private final Gson gson = new GsonBuilder().create();
+
+    @Autowired
+    private Disruptor<MarketEvent> disruptor;
 
     @OnOpen
     public void onOpen(Session session) {
@@ -34,7 +42,6 @@ public class Endpoint {
             SubscribeRequestModel model = new SubscribeRequestModel();
             model.setId(String.valueOf(MarketID.MARKET_SUBSCRIBE.ordinal()));
             model.setSub(channel);
-            Gson gson = new GsonBuilder().create();
             session.getBasicRemote().sendText(gson.toJson(model));
         } catch (IOException ex) {
             LOGGER.error("got exception", ex);
@@ -76,14 +83,14 @@ public class Endpoint {
             Map<String, Object> tickMap = (Map<String, Object>) map.get("tick");
             List<List<Double>> bids = (List<List<Double>>) tickMap.get("bids");
             List<List<Double>> asks = (List<List<Double>>) tickMap.get("asks");
-            Application.getDisuptor().publishEvent((event, sequence, arg) -> {
+            disruptor.publishEvent((event, sequence, arg) -> {
                 event.setOrderType(OrderType.BID);
                 event.setPrice(arg.get(0));
                 event.setVolume(arg.get(1));
                 event.setLevel(0);
                 event.setMarketID(MarketSource.HUOBI);
             }, bids.get(0));
-            Application.getDisuptor().publishEvent((event, sequence, arg) -> {
+            disruptor.publishEvent((event, sequence, arg) -> {
                 event.setOrderType(OrderType.ASK);
                 event.setPrice(arg.get(0));
                 event.setVolume(arg.get(1));
