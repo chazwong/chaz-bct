@@ -4,22 +4,22 @@ package chaz.trade.model;
  * Created by Administrator on 2017/8/28.
  */
 public class Order {
-    private float volume;
-    private float price;
+    private double volume;
+    private double price;
 
-    public float getVolume() {
+    public double getVolume() {
         return volume;
     }
 
-    public void setVolume(float volume) {
+    public void setVolume(double volume) {
         this.volume = volume;
     }
 
-    public float getPrice() {
+    public double getPrice() {
         return price;
     }
 
-    public void setPrice(float price) {
+    public void setPrice(double price) {
         this.price = price;
     }
 }

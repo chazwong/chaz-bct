@@ -1,6 +1,5 @@
 package chaz.trade.core;
 
-import chaz.trade.model.MarketData;
 import chaz.trade.model.Order;
 import chaz.trade.model.OrderType;
 import chaz.trade.output.OrderSender;
@@ -11,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * Created by chengzhang.wang on 2017/8/26.
@@ -19,17 +18,17 @@ import java.util.TreeMap;
 @Component
 public class TradeHandler implements EventHandler<MarketEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(TradeHandler.class);
-    private final TreeMap<Integer, MarketData> bidBook = new TreeMap<>();
-    private final TreeMap<Integer, MarketData> askBook = new TreeMap<>();
+    private final TreeSet<MarketEvent> bidBook = new TreeSet<>((e1, e2) -> (int) (e1.getPrice() - e2.getPrice()));
+    private final TreeSet<MarketEvent> askBook = new TreeSet<>((e1, e2) -> (int) (e1.getPrice() - e2.getPrice()));
     private final Map<Integer, OrderSender> orderSenderMap = new HashMap<>();
 
     @Override
     public void onEvent(MarketEvent event, long sequence, boolean endOfBatch) throws Exception {
-        if (event.getMarketData().getOrderType() == OrderType.ASK) {
-            askBook.put(event.getMarketData().getMarketID(), event.getMarketData());
+        if (event.getOrderType() == OrderType.ASK) {
+            askBook.add(event);
             checkTrade();
-        } else if (event.getMarketData().getOrderType() == OrderType.BID) {
-            bidBook.put(event.getMarketData().getMarketID(), event.getMarketData());
+        } else if (event.getOrderType() == OrderType.BID) {
+            bidBook.add(event);
             checkTrade();
         } else {
             LOGGER.error("event type is neither bid nor ask");
@@ -37,16 +36,18 @@ public class TradeHandler implements EventHandler<MarketEvent> {
     }
 
     private final void checkTrade() {
-        MarketData firstBid = bidBook.lastEntry().getValue();
-        MarketData firstAsk = askBook.firstEntry().getValue();
-        if ((firstBid.getPrice() - firstAsk.getPrice()) > 100) {
-            Order bidOrder = new Order();
-            bidOrder.setPrice(firstAsk.getPrice());
-            bidOrder.setVolume(Math.min(firstBid.getVolume(), firstAsk.getVolume()));
-            orderSenderMap.get(firstAsk.getMarketID()).sendBidOrder(bidOrder);
-            Order askOrder = new Order();
-            askOrder.setPrice(firstBid.getPrice());
-            askOrder.setVolume(Math.min(firstBid.getVolume(), firstAsk.getVolume()));
+        if(bidBook.size()>0&&askBook.size()>0) {
+            MarketEvent firstBid = bidBook.last();
+            MarketEvent firstAsk = askBook.first();
+            if ((firstBid.getPrice() - firstAsk.getPrice()) > 100) {
+                Order bidOrder = new Order();
+                bidOrder.setPrice(firstAsk.getPrice());
+                bidOrder.setVolume(Math.min(firstBid.getVolume(), firstAsk.getVolume()));
+                orderSenderMap.get(firstAsk.getMarketID()).sendBidOrder(bidOrder);
+                Order askOrder = new Order();
+                askOrder.setPrice(firstBid.getPrice());
+                askOrder.setVolume(Math.min(firstBid.getVolume(), firstAsk.getVolume()));
+            }
         }
     }
 }
