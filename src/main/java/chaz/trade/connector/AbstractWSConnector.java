@@ -12,10 +12,10 @@ import java.net.URI;
 /**
  * Created by Administrator on 2017/8/31.
  */
-public abstract class AbstractWSConnector implements OrderSender {
+public abstract class AbstractWSConnector implements OrderSender{
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractWSConnector.class);
 
-    private Session session;
+    protected Session session;
 
     public void start() {
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();

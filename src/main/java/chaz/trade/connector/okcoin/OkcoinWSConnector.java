@@ -26,12 +26,8 @@ public class OkcoinWSConnector extends AbstractWSConnector {
     }
 
     @Override
-    public void sendBidOrder(Order order) {
+    public void sendOrder(Order order) {
 
     }
 
-    @Override
-    public void sendAskOrder(Order order) {
-
-    }
 }

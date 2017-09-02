@@ -1,7 +1,8 @@
 package chaz.trade.core;
 
-import chaz.trade.connector.OrderSender;
+import chaz.trade.connector.AbstractWSConnector;
 import chaz.trade.model.MarketSource;
+import chaz.trade.model.MarketType;
 import chaz.trade.model.Order;
 import chaz.trade.model.OrderType;
 import com.lmax.disruptor.EventHandler;
@@ -21,7 +22,7 @@ public class TradeHandler implements EventHandler<MarketEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(TradeHandler.class);
     private final TreeSet<MarketEvent> bidBook = new TreeSet<>((e1, e2) -> (int) (e2.getPrice() - e1.getPrice()));
     private final TreeSet<MarketEvent> askBook = new TreeSet<>((e1, e2) -> (int) (e1.getPrice() - e2.getPrice()));
-    private final Map<MarketSource, OrderSender> orderSenderMap = new HashMap<>();
+    private final Map<MarketSource, AbstractWSConnector> orderSenderMap = new HashMap<>();
     private final Map<MarketSource, Double> balances = new HashMap<>();
 
     @Override
@@ -45,10 +46,15 @@ public class TradeHandler implements EventHandler<MarketEvent> {
                 Order bidOrder = new Order();
                 bidOrder.setPrice(firstAsk.getPrice());
                 bidOrder.setVolume(Math.min(firstBid.getVolume(), firstAsk.getVolume()));
-                orderSenderMap.get(firstAsk.getMarketID()).sendBidOrder(bidOrder);
+                bidOrder.setMarketType(MarketType.BTC);
+                bidOrder.setOrderType(OrderType.BID);
+                orderSenderMap.get(firstAsk.getMarketID()).sendOrder(bidOrder);
                 Order askOrder = new Order();
                 askOrder.setPrice(firstBid.getPrice());
                 askOrder.setVolume(Math.min(firstBid.getVolume(), firstAsk.getVolume()));
+                askOrder.setMarketType(MarketType.BTC);
+                askOrder.setOrderType(OrderType.BID);
+                orderSenderMap.get(firstBid.getMarketID()).sendOrder(askOrder);
             }
         }
     }
