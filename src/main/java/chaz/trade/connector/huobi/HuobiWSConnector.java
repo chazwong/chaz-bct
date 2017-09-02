@@ -8,6 +8,7 @@ import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.security.MessageDigest;
@@ -54,7 +55,29 @@ public class HuobiWSConnector extends AbstractWSConnector {
         }
     }
 
-    private Map<String, Object> createOrder(Order order) {
+    @Scheduled(cron = "0 * * * * *")
+    private void refreshAllAccounts() {
+        refreshAccount("cny");
+        //refreshAccount("usd");
+    }
+
+    private void refreshAccount(String market) {
+        try {
+            Map<String, Object> map = new HashMap<>();
+            map.put("method", "get_account_info");
+            map.put("access_key", access_key);
+            map.put("created", System.currentTimeMillis());
+            map.put("sign", MessageDigest.getInstance("MD5").digest(String.format("access_key=%s&created=%s&method=get_account_info&secret_key=%s", access_key, map.get("created"), "get_account_info", secret_key).getBytes()));
+            map.put("market", "get_account_info");
+            map.put("market", market);
+            session.getBasicRemote().sendText(gson.toJson(map));
+        } catch (Exception e) {
+            LOGGER.error("refresh account failed", e);
+        }
+    }
+
+
+    private final Map<String, Object> createOrder(Order order) {
         Map<String, Object> map = new HashMap<>();
         map.put("method", getMethod(order.getOrderType()));
         map.put("access_key", access_key);
