@@ -1,6 +1,6 @@
-package chaz.trade.input.okcoin;
+package chaz.trade.connector.okcoin;
 
-import chaz.trade.input.AbstractWSConnector;
+import chaz.trade.connector.AbstractWSConnector;
 import org.springframework.stereotype.Component;
 
 /**

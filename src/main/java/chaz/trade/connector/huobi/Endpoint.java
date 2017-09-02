@@ -1,12 +1,10 @@
-package chaz.trade.input.huobi;
+package chaz.trade.connector.huobi;
 
 import chaz.trade.Application;
 import chaz.trade.model.MarketSource;
 import chaz.trade.model.OrderType;
 import com.google.gson.*;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

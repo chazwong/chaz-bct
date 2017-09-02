@@ -1,4 +1,4 @@
-package chaz.trade.input;
+package chaz.trade.connector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

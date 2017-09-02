@@ -1,4 +1,4 @@
-package chaz.trade.input.okcoin;
+package chaz.trade.connector.okcoin;
 
 /**
  * Created by Administrator on 2017/8/31.

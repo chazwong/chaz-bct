@@ -1,6 +1,6 @@
-package chaz.trade.input.huobi;
+package chaz.trade.connector.huobi;
 
-import chaz.trade.input.AbstractWSConnector;
+import chaz.trade.connector.AbstractWSConnector;
 import org.springframework.stereotype.Component;
 
 /**

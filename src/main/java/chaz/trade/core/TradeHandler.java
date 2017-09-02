@@ -1,5 +1,6 @@
 package chaz.trade.core;
 
+import chaz.trade.model.MarketSource;
 import chaz.trade.model.Order;
 import chaz.trade.model.OrderType;
 import chaz.trade.output.OrderSender;
@@ -18,9 +19,10 @@ import java.util.TreeSet;
 @Component
 public class TradeHandler implements EventHandler<MarketEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(TradeHandler.class);
-    private final TreeSet<MarketEvent> bidBook = new TreeSet<>((e1, e2) -> (int) (e1.getPrice() - e2.getPrice()));
+    private final TreeSet<MarketEvent> bidBook = new TreeSet<>((e1, e2) -> (int) (e2.getPrice() - e1.getPrice()));
     private final TreeSet<MarketEvent> askBook = new TreeSet<>((e1, e2) -> (int) (e1.getPrice() - e2.getPrice()));
-    private final Map<Integer, OrderSender> orderSenderMap = new HashMap<>();
+    private final Map<MarketSource, OrderSender> orderSenderMap = new HashMap<>();
+    private final Map<MarketSource, Double> balances = new HashMap<>();
 
     @Override
     public void onEvent(MarketEvent event, long sequence, boolean endOfBatch) throws Exception {
@@ -36,8 +38,8 @@ public class TradeHandler implements EventHandler<MarketEvent> {
     }
 
     private final void checkTrade() {
-        if(bidBook.size()>0&&askBook.size()>0) {
-            MarketEvent firstBid = bidBook.last();
+        if (bidBook.size() > 0 && askBook.size() > 0) {
+            MarketEvent firstBid = bidBook.first();
             MarketEvent firstAsk = askBook.first();
             if ((firstBid.getPrice() - firstAsk.getPrice()) > 100) {
                 Order bidOrder = new Order();

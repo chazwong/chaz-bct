@@ -1,4 +1,4 @@
-package chaz.trade.input.huobi;
+package chaz.trade.connector.huobi;
 
 /**
  * Created by Administrator on 2017/8/30.

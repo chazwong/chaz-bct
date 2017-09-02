@@ -1,12 +1,10 @@
-package chaz.trade.input.okcoin;
+package chaz.trade.connector.okcoin;
 
 import chaz.trade.Application;
-import chaz.trade.core.MarketEvent;
 import chaz.trade.model.MarketSource;
 import chaz.trade.model.OrderType;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.lmax.disruptor.dsl.Disruptor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
