@@ -1,7 +1,7 @@
 package chaz.trade.connector.huobi;
 
 import chaz.trade.connector.AbstractWSConnector;
-import chaz.trade.model.*;
+import chaz.trade.model.MarketType;
 import chaz.trade.model.Order;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -11,6 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.Response;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -25,13 +32,20 @@ public class HuobiWSConnector extends AbstractWSConnector {
 
     private final String url = "wss://api.huobi.com/ws";
 
-    private final Gson gson = new GsonBuilder().create();
+    private final String apiv3 = "https://api.huobi.com/apiv3";
 
-    private final Map<MarketType, Account> accounts = new HashMap<>();
+    private final Gson gson = new GsonBuilder().create();
 
     private final String access_key = "6a674ef0-7468c57c-eff323dd-c9441";
     private final String secret_key = "b4167183-2fd35090-a1b96186-7c4f4";
 
+    private final Map<String, Account> accountMap = new HashMap<>();
+
+    @PostConstruct
+    private void init() {
+        accountMap.put("cny", new Account());
+        refreshAllAccounts();
+    }
 
     @Autowired
     private Endpoint endpoint;
@@ -58,24 +72,26 @@ public class HuobiWSConnector extends AbstractWSConnector {
     @Scheduled(cron = "0 * * * * *")
     private void refreshAllAccounts() {
         refreshAccount("cny");
-        //refreshAccount("usd");
     }
 
     private void refreshAccount(String market) {
         try {
-            Map<String, Object> map = new HashMap<>();
-            map.put("method", "get_account_info");
-            map.put("access_key", access_key);
-            map.put("created", System.currentTimeMillis());
-            map.put("sign", MessageDigest.getInstance("MD5").digest(String.format("access_key=%s&created=%s&method=get_account_info&secret_key=%s", access_key, map.get("created"), "get_account_info", secret_key).getBytes()));
-            map.put("market", "get_account_info");
-            map.put("market", market);
-            session.getBasicRemote().sendText(gson.toJson(map));
+            MultivaluedHashMap<String,String> map = new MultivaluedHashMap();
+            map.putSingle("method", "get_account_info");
+            map.putSingle("access_key", access_key);
+            map.putSingle("created", String.valueOf(System.currentTimeMillis()));
+            map.putSingle("sign", String.valueOf(MessageDigest.getInstance("MD5").digest(String.format("access_key=%s&created=%s&method=get_account_info&secret_key=%s", access_key, map.get("created"), "get_account_info", secret_key).getBytes())));
+            map.putSingle("market", "get_account_info");
+            map.putSingle("market", market);
+            Client client = ClientBuilder.newClient();
+            Response htpRes = client.target(apiv3).path("/").request(MediaType.APPLICATION_JSON).post(Entity.form(map));
+            Map response = htpRes.readEntity(Map.class);
+            accountMap.get(market).setAvailable((Double) response.get("available_cny_display"));
+            accountMap.get(market).setFrozen((Double) response.get("frozen_cny_display"));
         } catch (Exception e) {
             LOGGER.error("refresh account failed", e);
         }
     }
-
 
     private final Map<String, Object> createOrder(Order order) {
         Map<String, Object> map = new HashMap<>();

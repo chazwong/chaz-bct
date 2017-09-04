@@ -1,6 +1,6 @@
 package chaz.trade.core;
 
-import chaz.trade.connector.AbstractWSConnector;
+import chaz.trade.connector.OrderSender;
 import chaz.trade.model.MarketSource;
 import chaz.trade.model.MarketType;
 import chaz.trade.model.Order;
@@ -22,7 +22,7 @@ public class TradeHandler implements EventHandler<MarketEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(TradeHandler.class);
     private final TreeSet<MarketEvent> bidBook = new TreeSet<>((e1, e2) -> (int) (e2.getPrice() - e1.getPrice()));
     private final TreeSet<MarketEvent> askBook = new TreeSet<>((e1, e2) -> (int) (e1.getPrice() - e2.getPrice()));
-    private final Map<MarketSource, AbstractWSConnector> orderSenderMap = new HashMap<>();
+    private final Map<MarketSource, OrderSender> orderSenderMap = new HashMap<>();
     private final Map<MarketSource, Double> balances = new HashMap<>();
 
     @Override
