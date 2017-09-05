@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -50,6 +51,13 @@ public class OkcoinWSConnector extends AbstractWSConnector {
     protected Object getEndpointInstance() {
         return endpoint;
     }
+
+    @PostConstruct
+    private void init() {
+//        accountMap.put("cny", new Account());
+        refreshAllAccounts();
+    }
+
 
     @Override
     public void sendOrder(Order order) {

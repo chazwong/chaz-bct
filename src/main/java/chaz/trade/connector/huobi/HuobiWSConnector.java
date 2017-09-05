@@ -5,6 +5,7 @@ import chaz.trade.model.MarketType;
 import chaz.trade.model.Order;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.glassfish.jersey.jackson.internal.jackson.jaxrs.json.JacksonJsonProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,14 +77,14 @@ public class HuobiWSConnector extends AbstractWSConnector {
 
     private void refreshAccount(String market) {
         try {
-            MultivaluedHashMap<String,String> map = new MultivaluedHashMap();
+            MultivaluedHashMap<String, String> map = new MultivaluedHashMap();
             map.putSingle("method", "get_account_info");
             map.putSingle("access_key", access_key);
-            map.putSingle("created", String.valueOf(System.currentTimeMillis()));
-            map.putSingle("sign", String.valueOf(MessageDigest.getInstance("MD5").digest(String.format("access_key=%s&created=%s&method=get_account_info&secret_key=%s", access_key, map.get("created"), "get_account_info", secret_key).getBytes())));
-            map.putSingle("market", "get_account_info");
+            String created = String.valueOf(System.currentTimeMillis() / 1000);
+            map.putSingle("created", created);
+            map.putSingle("sign", MD5(String.format("access_key=%s&created=%s&method=get_account_info&secret_key=%s", access_key, created, secret_key)).toLowerCase());
             map.putSingle("market", market);
-            Client client = ClientBuilder.newClient();
+            Client client = ClientBuilder.newClient().register(JacksonJsonProvider.class);
             Response htpRes = client.target(apiv3).path("/").request(MediaType.APPLICATION_JSON).post(Entity.form(map));
             Map response = htpRes.readEntity(Map.class);
             accountMap.get(market).setAvailable((Double) response.get("available_cny_display"));
@@ -132,6 +133,32 @@ public class HuobiWSConnector extends AbstractWSConnector {
                 return 2;
             default:
                 throw new RuntimeException("unsupported coin type" + marketType.name());
+        }
+    }
+
+    public final static String MD5(String s) {
+        char hexDigits[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+        try {
+            byte[] btInput = s.getBytes("utf-8");
+            // 获得MD5摘要算法的 MessageDigest 对象
+            MessageDigest mdInst = MessageDigest.getInstance("MD5");
+            // 使用指定的字节更新摘要
+            mdInst.update(btInput);
+            // 获得密文
+            byte[] md = mdInst.digest();
+            // 把密文转换成十六进制的字符串形式
+            int j = md.length;
+            char str[] = new char[j * 2];
+            int k = 0;
+            for (int i = 0; i < j; i++) {
+                byte byte0 = md[i];
+                str[k++] = hexDigits[byte0 >>> 4 & 0xf];
+                str[k++] = hexDigits[byte0 & 0xf];
+            }
+            return new String(str);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }
