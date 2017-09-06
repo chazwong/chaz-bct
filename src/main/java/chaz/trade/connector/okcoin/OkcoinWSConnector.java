@@ -15,10 +15,7 @@ import javax.annotation.PostConstruct;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,6 +29,8 @@ public class OkcoinWSConnector extends AbstractWSConnector {
     private final String url = "wss://real.okcoin.cn:10440/websocket/okcoinapi";
 
     private final String accounturl = "https://www.okcoin.cn/api/v1/userinfo.do";
+
+    private final String orderUrl = "https://www.okcoin.cn/api/v1/trade.do";
 
     private final String apiKey = "09aa8c48-6a59-41a3-b643-f36e14d02be3";
     private final String secretKey = "F02198191E4169B701C770EE5CDDA712";
@@ -63,17 +62,30 @@ public class OkcoinWSConnector extends AbstractWSConnector {
     @Override
     public void sendOrder(Order order) {
         try {
-            session.getBasicRemote().sendText(gson.toJson(createOrder(order)));
+            session.getBasicRemote().sendText(gson.toJson(createOrder(order, "btc_cny")));
         } catch (Exception e) {
             LOGGER.error("send huobi order failed", e);
         }
     }
 
 
-    private final Map<String, Object> createOrder(Order order) throws NoSuchAlgorithmException {
+    private final Map<String, Object> createOrder(Order order, String symbol) {
         Map<String, Object> map = new HashMap<>();
-        map.put("api_key", apiKey);
-        map.put("sign", MessageDigest.getInstance("MD5").digest(String.format("").getBytes()));
+//        map.put("api_key", apiKey);
+//        map.put("symbol", symbol);
+//        String type = "";
+//        switch (order.getOrderType()) {
+//            case BID:
+//                type = "buy";
+//                break;
+//            case ASK:
+//                type = "sell";
+//                break;
+//        }
+//        map.put("type", type);
+//        map.put("price", order.getPrice());
+//        map.put("amount", order.getVolume());
+//        putMD5(map);
         return map;
     }
 
@@ -85,10 +97,10 @@ public class OkcoinWSConnector extends AbstractWSConnector {
 
     private void refreshAccount(String market) {
         try {
-            MultivaluedHashMap<String, String> map = new MultivaluedHashMap();
-            map.putSingle("api_key", apiKey);
-            map.putSingle("sign", MD5(String.format("api_key=%s&secret_key=%s", apiKey, secretKey)).toUpperCase());
-            Response response = ClientBuilder.newClient().target(accounturl).request(MediaType.APPLICATION_JSON).post(Entity.form(map));
+            Map<String, Object> map = new HashMap<>();
+            map.put("api_key", apiKey);
+            putMD5(map);
+            Response response = ClientBuilder.newClient().target(accounturl).request(MediaType.APPLICATION_JSON).post(Entity.form(toMultivaluedHashMap(map)));
             if (response.getStatus() == Response.Status.OK.getStatusCode()) {
                 Map resultMap = gson.fromJson(response.readEntity(String.class), Map.class);
                 if (resultMap.get("result").equals(true)) {
@@ -102,6 +114,12 @@ public class OkcoinWSConnector extends AbstractWSConnector {
         } catch (Exception e) {
             LOGGER.error("refresh account failed", e);
         }
+    }
+
+    private final void putMD5(Map<String, Object> map) {
+        map.put("secret_key", secretKey);
+        map.put("sign", MD5(map).toUpperCase());
+        map.remove("secret_key");
     }
 
 }

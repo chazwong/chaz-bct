@@ -6,9 +6,13 @@ import org.slf4j.LoggerFactory;
 import javax.websocket.ContainerProvider;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
+import javax.ws.rs.core.MultivaluedHashMap;
 import java.io.IOException;
 import java.net.URI;
 import java.security.MessageDigest;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by Administrator on 2017/8/31.
@@ -61,6 +65,16 @@ public abstract class AbstractWSConnector implements OrderSender {
             e.printStackTrace();
             return null;
         }
+    }
+
+    protected final String MD5(Map<String, Object> map) {
+        return MD5(map.entrySet().stream().sorted(Comparator.comparing(Map.Entry::getKey)).map(entry -> String.format("%s=%s", entry.getKey(), entry.getValue().toString())).collect(Collectors.joining("&")));
+    }
+
+    protected final MultivaluedHashMap toMultivaluedHashMap(Map<String, Object> map) {
+        MultivaluedHashMap multivaluedHashMap = new MultivaluedHashMap();
+        map.entrySet().forEach(entry -> multivaluedHashMap.putSingle(entry.getKey(), entry.getValue()));
+        return multivaluedHashMap;
     }
 
     protected abstract String getUrl();

@@ -15,10 +15,7 @@ import javax.annotation.PostConstruct;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -75,14 +72,13 @@ public class HuobiWSConnector extends AbstractWSConnector {
 
     private void refreshAccount(String market) {
         try {
-            MultivaluedHashMap<String, String> map = new MultivaluedHashMap();
-            map.putSingle("method", "get_account_info");
-            map.putSingle("access_key", access_key);
-            String created = String.valueOf(System.currentTimeMillis() / 1000);
-            map.putSingle("created", created);
-            map.putSingle("sign", MD5(String.format("access_key=%s&created=%s&method=get_account_info&secret_key=%s", access_key, created, secret_key)).toLowerCase());
-            map.putSingle("market", market);
-            Response httpResponse = ClientBuilder.newClient().target(apiv3).request(MediaType.APPLICATION_JSON).post(Entity.form(map));
+            Map<String, Object> map = new HashMap<>();
+            map.put("method", "get_account_info");
+            map.put("access_key", access_key);
+            map.put("created", String.valueOf(System.currentTimeMillis() / 1000));
+            putMD5(map);
+            map.put("market", market);
+            Response httpResponse = ClientBuilder.newClient().target(apiv3).request(MediaType.APPLICATION_JSON).post(Entity.form(toMultivaluedHashMap(map)));
             Map<String, String> response = gson.fromJson(httpResponse.readEntity(String.class), Map.class);
             accountMap.get(market).setAvailable(Double.valueOf(response.get("available_cny_display")));
             accountMap.get(market).setFrozen(Double.valueOf(response.get("frozen_cny_display")));
@@ -93,21 +89,16 @@ public class HuobiWSConnector extends AbstractWSConnector {
 
     private final Map<String, Object> createOrder(Order order) {
         Map<String, Object> map = new HashMap<>();
-        map.put("method", getMethod(order.getOrderType()));
-        map.put("access_key", access_key);
-        map.put("coin_type", getCoinType(order.getMarketType()));
-        map.put("price", order.getPrice());
-        map.put("amount", order.getVolume());
-        map.put("created", System.currentTimeMillis());
-        try {
-            map.put("sign", MessageDigest.getInstance("MD5").digest(String.format
-                    ("access_key=%s&amount=%s&coin_type=%s&created=%s&method=%s&price=%s&secret_key=%s", access_key, order.getVolume(), map.get("coin_type"), map.get("created"), map.get("method"), order.getPrice(), secret_key).getBytes()));
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        map.put("trade_password", "wcz19891124097X");
-        map.put("trade_id", 111);
-        map.put("market", "cny");
+//        map.put("method", getMethod(order.getOrderType()));
+//        map.put("access_key", access_key);
+//        map.put("coin_type", getCoinType(order.getMarketType()));
+//        map.put("price", order.getPrice());
+//        map.put("amount", order.getVolume());
+//        map.put("created", System.currentTimeMillis());
+//        putMD5(map);
+//        map.put("trade_password", "wcz19891124097X");
+//        map.put("trade_id", 111);
+//        map.put("market", "cny");
         return map;
     }
 
@@ -131,6 +122,12 @@ public class HuobiWSConnector extends AbstractWSConnector {
             default:
                 throw new RuntimeException("unsupported coin type" + marketType.name());
         }
+    }
+
+    private final void putMD5(Map<String, Object> map) {
+        map.put("secret_key", secret_key);
+        map.put("sign", MD5(map).toLowerCase());
+        map.remove("secret_key");
     }
 
 
