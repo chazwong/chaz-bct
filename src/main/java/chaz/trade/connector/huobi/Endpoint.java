@@ -1,6 +1,5 @@
 package chaz.trade.connector.huobi;
 
-import chaz.trade.Application;
 import chaz.trade.core.MarketEvent;
 import chaz.trade.model.MarketSource;
 import chaz.trade.model.OrderType;

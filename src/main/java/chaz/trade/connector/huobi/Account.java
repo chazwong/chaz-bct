@@ -5,7 +5,7 @@ import chaz.trade.model.Balance;
 /**
  * Created by Administrator on 2017/9/2.
  */
-public class Account extends Balance{
+public class Account extends Balance {
     private String id;
 
     public String getId() {

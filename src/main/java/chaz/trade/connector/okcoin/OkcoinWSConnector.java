@@ -12,10 +12,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.Response;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -84,17 +85,19 @@ public class OkcoinWSConnector extends AbstractWSConnector {
 
     private void refreshAccount(String market) {
         try {
-            Map<String, Object> map = new HashMap<>();
-            map.put("api_key", apiKey);
-            map.put("sign", MessageDigest.getInstance("MD5").digest(
-                    String.format("api_key=%s&secret_key=%s", apiKey, secretKey).getBytes()
-            ));
-            Client client = ClientBuilder.newClient();
-            Map response = client.target(accounturl).path("/").request(MediaType.APPLICATION_FORM_URLENCODED).post(Entity.json(map)).readEntity(Map.class);
-            if (response.get("result").equals(true)) {
-                Map<String, String> asset = (Map<String, String>) ((Map<String, Map>) response.get("info")).get("funds").get("asset");
-                cnyAccount.setAvailable(Double.valueOf(asset.get("net")));
-                cnyAccount.setFrozen(Double.valueOf(asset.get("total")) - Double.valueOf(asset.get("net")));
+            MultivaluedHashMap<String, String> map = new MultivaluedHashMap();
+            map.putSingle("api_key", apiKey);
+            map.putSingle("sign", MD5(String.format("api_key=%s&secret_key=%s", apiKey, secretKey)).toUpperCase());
+            Response response = ClientBuilder.newClient().target(accounturl).request(MediaType.APPLICATION_JSON).post(Entity.form(map));
+            if (response.getStatus() == Response.Status.OK.getStatusCode()) {
+                Map resultMap = gson.fromJson(response.readEntity(String.class), Map.class);
+                if (resultMap.get("result").equals(true)) {
+                    Map<String, String> asset = (Map<String, String>) ((Map<String, Map>) resultMap.get("info")).get("funds").get("asset");
+                    cnyAccount.setAvailable(Double.valueOf(asset.get("net")));
+                    cnyAccount.setFrozen(Double.valueOf(asset.get("total")) - Double.valueOf(asset.get("net")));
+                }
+            } else {
+                LOGGER.error("refresh account failed: " + response.getStatusInfo().toString());
             }
         } catch (Exception e) {
             LOGGER.error("refresh account failed", e);

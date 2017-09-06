@@ -7,7 +7,7 @@ import chaz.trade.model.OrderType;
 /**
  * Created by chengzhang.wang on 2017/8/29.
  */
-public class MarketEvent extends Order{
+public class MarketEvent extends Order {
     private OrderType orderType;
     private int level;
     private MarketSource marketID;
