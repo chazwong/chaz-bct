@@ -1,6 +1,7 @@
 package chaz.trade.connector.okcoin;
 
 import chaz.trade.connector.AbstractWSConnector;
+import chaz.trade.connector.Utils;
 import chaz.trade.connector.huobi.Account;
 import chaz.trade.model.Order;
 import com.google.gson.Gson;
@@ -100,7 +101,7 @@ public class OkcoinWSConnector extends AbstractWSConnector {
             Map<String, Object> map = new HashMap<>();
             map.put("api_key", apiKey);
             putMD5(map);
-            Response response = ClientBuilder.newClient().target(accounturl).request(MediaType.APPLICATION_JSON).post(Entity.form(toMultivaluedHashMap(map)));
+            Response response = ClientBuilder.newClient().target(accounturl).request(MediaType.APPLICATION_JSON).post(Entity.form(Utils.toMultivaluedHashMap(map)));
             if (response.getStatus() == Response.Status.OK.getStatusCode()) {
                 Map resultMap = gson.fromJson(response.readEntity(String.class), Map.class);
                 if (resultMap.get("result").equals(true)) {
@@ -118,7 +119,7 @@ public class OkcoinWSConnector extends AbstractWSConnector {
 
     private final void putMD5(Map<String, Object> map) {
         map.put("secret_key", secretKey);
-        map.put("sign", MD5(map).toUpperCase());
+        map.put("sign", Utils.MD5(map).toUpperCase());
         map.remove("secret_key");
     }
 
