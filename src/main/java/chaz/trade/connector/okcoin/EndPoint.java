@@ -113,7 +113,7 @@ public class EndPoint {
         double bidPrice = firstBidPrice + 0.01f; //取最高买价
         double askPrice = firstAskPrice - 0.01f; //取卖价卖价
         if (hasProfit(bidPrice, askPrice)) {
-            double cnyFree = ObjectUtils.min(free.getOrDefault("cny", 0.0d), 500.0d);
+            double cnyFree = free.getOrDefault("cny", 0.0d) - 500d;
             double ltcBalance = free.get(freeKey);
             if (ltcBalance < least && cnyFree >= askPrice * least) {//无币有钱，买币
                 sendOrder(bidPrice, cnyFree / bidPrice, bidType, symbol);
