@@ -6,18 +6,13 @@ import org.slf4j.LoggerFactory;
 import javax.websocket.ContainerProvider;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
-import javax.ws.rs.core.MultivaluedHashMap;
 import java.io.IOException;
 import java.net.URI;
-import java.security.MessageDigest;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Created by Administrator on 2017/8/31.
  */
-public abstract class AbstractWSConnector implements OrderSender {
+public abstract class AbstractWSConnector {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractWSConnector.class);
 
     protected Session session;
