@@ -4,6 +4,7 @@ import chaz.trade.connector.okcoin.OkcoinWSConnector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import javax.annotation.PreDestroy;
 
@@ -11,6 +12,7 @@ import javax.annotation.PreDestroy;
  * Created by Administrator on 2017/9/13.
  */
 @SpringBootApplication
+@EnableScheduling
 public class SingleMarketHedgeApplication {
     @Autowired
     private OkcoinWSConnector okcoinWSConnector;

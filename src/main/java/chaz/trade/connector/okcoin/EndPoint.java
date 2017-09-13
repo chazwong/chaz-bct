@@ -6,6 +6,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
@@ -139,6 +140,12 @@ public class EndPoint {
         subscribeMarket(ltcChannel);
         subscribeMarket(ethChannel);
         subscribeMarket(btcChannel);
+    }
+
+    //每分钟登陆一次
+    @Scheduled(cron = "0 * * * * *")
+    private void login() {
+        sendRequest("login", null, null);
     }
 
     @OnMessage
